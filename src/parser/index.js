@@ -1,15 +1,16 @@
+/********** Deps**********/
 import {
     Lexer, 
     createToken,
     CstParser
 } from 'chevrotain';
 
-// const util = require('util');
+/********** Public API **********/
+export default generateAST;
 
-// function print(val) {
-//     console.log(util.inspect(val, false, null, true));
-// }
+/********** Implementation **********/
 
+/***** Lexer *****/
 const openTagStart = createToken({name: 'openTagStart', pattern: /<[a-zA-Z]\w*/})
 const openTagEnd = createToken({name: 'openTagEnd', pattern: /\s*>/});
 const closingTag = createToken({name: 'closingTag', pattern: /<\/[a-zA-Z]\w*>/})
@@ -19,7 +20,7 @@ const value = createToken({name: 'value', pattern: /"([^"]*)"/});
 const interpolation = createToken({name: 'interpolation', pattern: /{{[a-zA-Z]\w*}}/});
 const text = createToken({name: 'text', pattern: /[^<>]+/});
 
-let allTokens = [
+var allTokens = [
     openTagStart,
     openTagEnd,
     closingTag,
@@ -30,8 +31,7 @@ let allTokens = [
     text
 ];
 
-let htmlxLexer = new Lexer(allTokens);
-
+/***** Parser *****/
 class HtmlxParser extends CstParser {
     constructor() {
         super(allTokens);
@@ -71,18 +71,16 @@ class HtmlxParser extends CstParser {
             $.CONSUME(value)
         })
 
-        // $.RULE('Text', () => {
-        //     $.OPTION(() => $.CONSUME(text));
-        //     $.OPTION(() => $.CONSUME(interpolation));
-        // })
-
         this.performSelfAnalysis();
     }
 }
-const parser = new HtmlxParser();
 
-const BaseHTMLXVisitor = parser.getBaseCstVisitorConstructor();
+var htmlxLexer = new Lexer(allTokens);
+var parser = new HtmlxParser();
+var BaseHTMLXVisitor = parser.getBaseCstVisitorConstructor();
 
+
+/***** Semantic Analyzer *****/
 class HTMLXVisitor extends BaseHTMLXVisitor {
     constructor() {
         super();
@@ -125,18 +123,15 @@ class HTMLXVisitor extends BaseHTMLXVisitor {
     }
 }
 
-const myHTMLXVisitorInstance = new HTMLXVisitor();
+var myHTMLXVisitorInstance = new HTMLXVisitor();
 
-function parse(input) {
+function generateAST(input) {
     var lexingResult = htmlxLexer.tokenize(input);
     parser.input = lexingResult.tokens;
     let cstOutput = parser.HTMLX();
     if(!cstOutput) {
-        console.log(lexingResult.tokens);
-        throw new Error('Invalid parse input');
+        throw new Error(`Invalid input for parser: ${lexingResult.tokens.map(token => token.tokenType.name)}`);
     }
     let ast = myHTMLXVisitorInstance.visit(cstOutput);
     return ast;
 }
-
-export default parse;
