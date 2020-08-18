@@ -1,0 +1,22 @@
+{
+  "name": "fnew",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "webpack-dev-server --config webpack.config.js --open",
+    "test": "jest --watchAll"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.11.0",
+    "html-webpack-plugin": "^4.3.0",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12"
+  },
+  "dependencies": {
+    "chevrotain": "^7.0.1",
+    "jest": "^26.4.0",
+    "node-html-parser": "^1.2.20",
+    "webpack-dev-server": "^3.11.0"
+  }
+}
